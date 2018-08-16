@@ -31,6 +31,7 @@
 #include <Magnum/GL/Shader.h>
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/GL/Version.h>
+#include <Magnum/GL/Extensions.h>
 
 #include <imgui.h>
 
@@ -343,6 +344,12 @@ ImguiShader::ImguiShader() {
       // "#endif\n"
       "\n"
       "#ifdef EXPLICIT_UNIFORM_LOCATION\n"
+      "#extension GL_ARB_explicit_uniform_location: enable\n"
+      "#endif\n"
+      "#ifdef EXPLICIT_ATTRIB_LOCATION\n"
+      "#extension GL_ARB_explicit_attrib_location: enable\n"
+      "#endif\n"
+      "#ifdef EXPLICIT_UNIFORM_LOCATION\n"
       "layout(location = 0)\n"
       "#endif\n"
       "  uniform mediump mat4 ProjMtx;\n"
@@ -411,11 +418,27 @@ ImguiShader::ImguiShader() {
   GL::Shader vert{version, GL::Shader::Type::Vertex};
   GL::Shader frag{version, GL::Shader::Type::Fragment};
 
-  #ifndef MAGNUM_TARGET_GLES
+#ifndef MAGNUM_TARGET_GLES
   if (version != GL::Version::GL210) {
     vert.addSource({"#define NEW_GLSL\n"});
     frag.addSource({"#define NEW_GLSL\n"});
   }
+
+  // Enable explicit attribute locations in shader if they are supported, otherwise bind locations directly
+  if (GL::Context::current().isExtensionSupported<GL::Extensions::ARB::explicit_attrib_location>(version)) {
+    vert.addSource({"#define EXPLICIT_ATTRIB_LOCATION\n"});
+  }
+  else {
+    bindAttributeLocation(Position::Location, "Position");
+    bindAttributeLocation(TextureCoordinates::Location, "UV");
+    bindAttributeLocation(Color::Location, "Color");
+  }
+
+  // Enable explicit uniform locations if they are supported
+  if (GL::Context::current().isExtensionSupported<GL::Extensions::ARB::explicit_uniform_location>(version)) {
+    vert.addSource({"#define EXPLICIT_UNIFORM_LOCATION\n"});
+  }
+
 #else
   if (version != Version::GLES200) {
     vert.addSource({"#define NEW_GLSL\n"});
