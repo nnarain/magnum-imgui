@@ -25,6 +25,11 @@
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/GL/Version.h>
 
+#include <chrono>
+#include <thread>
+
+using namespace std::chrono_literals;
+
 Example::Example(const Arguments &arguments)
     : Platform::Application{
           arguments, Configuration{}
@@ -76,6 +81,8 @@ void Example::drawEvent() {
   swapBuffers();
 
   redraw();
+
+  std::this_thread::sleep_for(16ms);
 }
 
 void Example::viewportEvent(const Vector2i &size) {
