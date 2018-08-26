@@ -104,6 +104,14 @@ private:
   bool mousePressReleaseEvent(const Magnum::Platform::Application::MouseEvent& event, bool value);
 };
 
+namespace ImGui {
+
+  void Image(Magnum::GL::Texture2D& texture, Magnum::Vector2 size);
+  void Image(Magnum::GL::Texture2D& texture, Magnum::Vector2 size, Magnum::Vector2 uv0, Magnum::Vector2 uv1);
+  void Image(Magnum::GL::Texture2D& texture, Magnum::Vector2 size, Magnum::Vector4 tint, Magnum::Vector4 border);
+  void Image(Magnum::GL::Texture2D& texture, Magnum::Vector2 size, Magnum::Vector2 uv0, Magnum::Vector2 uv1, Magnum::Vector4 tint, Magnum::Vector4 border);
+
+}
 
 #endif // MagnumImgui_h__
 

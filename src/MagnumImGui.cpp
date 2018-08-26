@@ -260,7 +260,6 @@ void MagnumImGui::drawFrame() {
       {-1.0f, 1.0f, 0.0f, 1.0f},
   };
   mShader.setProjectMatrix(ortho_projection);
-  mShader.setTexture(mTexture);
 
   for (int n = 0; n < draw_data->CmdListsCount; n++) {
     const ImDrawList *cmd_list          = draw_data->CmdLists[n];
@@ -275,6 +274,16 @@ void MagnumImGui::drawFrame() {
 
     for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++) {
       const ImDrawCmd *pcmd = &cmd_list->CmdBuffer[cmd_i];
+
+      auto user_texture = static_cast<GL::Texture2D*>(pcmd->TextureId);
+      if (user_texture)
+      {
+          mShader.setTexture(*user_texture);
+      }
+      else
+      {
+          mShader.setTexture(mTexture);
+      }
 
       GL::Renderer::setScissor(
           {{(int)pcmd->ClipRect.x, fb_height - (int)(pcmd->ClipRect.w)},
@@ -458,4 +467,33 @@ ImguiShader::ImguiShader() {
   mProjMatrixUniform = uniformLocation("ProjMtx");
 
   setUniform(uniformLocation("Texture"), TextureLayer);
+}
+
+namespace ImGui {
+
+void Image(Magnum::GL::Texture2D& texture, Magnum::Vector2 size)
+{
+  Image(texture, size, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 }, { 0, 0, 0, 0 });
+}
+void Image(Magnum::GL::Texture2D& texture, Magnum::Vector2 size, Magnum::Vector2 uv0, Magnum::Vector2 uv1)
+{
+    Image(texture, size, uv0, uv1, { 1, 1, 1, 1 }, { 0, 0, 0, 0 });
+}
+
+void Image(Magnum::GL::Texture2D& texture, Magnum::Vector2 size, Magnum::Vector4 tint, Magnum::Vector4 border)
+{
+    Image(texture, size, { 0, 0 }, { 1, 1 }, tint, border);
+}
+
+void Image(Magnum::GL::Texture2D& texture, Magnum::Vector2 size, Magnum::Vector2 uv0, Magnum::Vector2 uv1, Magnum::Vector4 tint, Magnum::Vector4 border)
+{
+    Image(
+        static_cast<ImTextureID>(&texture),
+        { size[0], size[1] },
+        { uv0[0], uv0[1] }, { uv1[0], uv1[1] },
+        { tint[0], tint[1], tint[2], tint[3] },
+        { border[0], border[1], border[2], border[3] }
+    );
+}
+
 }
