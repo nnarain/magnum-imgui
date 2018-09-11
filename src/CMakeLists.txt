@@ -5,9 +5,15 @@ find_package(Magnum REQUIRED
   Shaders
   Sdl2Application)
 find_package(SDL2 REQUIRED)
-find_package(imgui REQUIRED)
+if (FIND_IMGUI)
+  find_package(imgui REQUIRED)
+endif()
 
-add_library(${PROJECT_NAME} MagnumImGui.cpp ${MagnumImGuiShaders_RCS})
+if (BUILD_SHARED_LIBS)
+  add_library(${PROJECT_NAME} SHARED MagnumImGui.cpp ${MagnumImGuiShaders_RCS})
+else()
+  add_library(${PROJECT_NAME} STATIC MagnumImGui.cpp ${MagnumImGuiShaders_RCS})
+endif()
 
 target_link_libraries(${PROJECT_NAME}
   Magnum::Application
